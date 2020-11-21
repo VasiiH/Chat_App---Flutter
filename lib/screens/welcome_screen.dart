@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
-import 'login_screen.dart';
 import 'registration_screen.dart';
-import 'registration_screen.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static const String id = 'welcome_screen';
@@ -15,6 +14,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     with SingleTickerProviderStateMixin {
   AnimationController controller;
   Animation animation;
+  Animation animation2;
 
   @override
   void initState() {
@@ -26,8 +26,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       //upperBound: 100.0,
     );
 
-  //  animation = CurvedAnimation(parent: controller, curve: Curves.easeIn);
-    animation = ColorTween(begin: Colors.blueGrey, end: Colors.white).animate(controller);
+    animation2 = CurvedAnimation(parent: controller, curve: Curves.easeIn);
+    animation = ColorTween(begin: Colors.blueGrey, end: Colors.white)
+        .animate(controller);
 
     controller.forward();
     // controller.reverse(from: 1.0);
@@ -39,7 +40,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   void dispose() {
-   controller.dispose();
+    controller.dispose();
     super.dispose();
   }
 
@@ -60,17 +61,25 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   child: Container(
                     child: Image.asset('images/chat2.png'),
                     //height: animation.value * 100.0,
-                    height: 60.0,
+                    height: animation2.value * 60.0,
                   ),
                 ),
                 Expanded(
-                  child: Text(
+                  child: ColorizeAnimatedTextKit(
                     // 'Quick Chat\n${controller.value.toInt()}%',
-                    'Quick Chat',
-                    style: TextStyle(
+                    text:['Quick Chat'],
+                    textStyle: TextStyle(
                       fontSize: 45.0,
                       fontWeight: FontWeight.w900,
                     ),
+                      colors: [
+                        Colors.purple,
+                        Colors.blue,
+                        Colors.yellow,
+                        Colors.red,
+                      ],
+                      textAlign: TextAlign.start,
+                      alignment: AlignmentDirectional.topStart
                   ),
                 ),
               ],
