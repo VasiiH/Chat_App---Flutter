@@ -85,6 +85,7 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.0-nullsafety.3"
+<<<<<<< HEAD
   firebase:
     dependency: "direct main"
     description:
@@ -92,6 +93,8 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "7.3.2"
+=======
+>>>>>>> origin/master
   firebase_auth:
     dependency: "direct main"
     description:
@@ -134,6 +137,7 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.1"
+<<<<<<< HEAD
   firebase_dynamic_links:
     dependency: "direct main"
     description:
@@ -141,6 +145,8 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.2"
+=======
+>>>>>>> origin/master
   flutter:
     dependency: "direct main"
     description: flutter
@@ -156,6 +162,7 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+<<<<<<< HEAD
   http:
     dependency: transitive
     description:
@@ -163,6 +170,8 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.12.2"
+=======
+>>>>>>> origin/master
   http_parser:
     dependency: transitive
     description:
@@ -212,6 +221,7 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.0-nullsafety.3"
+<<<<<<< HEAD
   pedantic:
     dependency: transitive
     description:
@@ -219,6 +229,8 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.9.2"
+=======
+>>>>>>> origin/master
   plugin_platform_interface:
     dependency: transitive
     description:
