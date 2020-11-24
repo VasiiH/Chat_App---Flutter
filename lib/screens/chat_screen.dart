@@ -23,9 +23,9 @@ class _ChatScreenState extends State<ChatScreen> {
     getCurrentUser();
   }
 
-  void getCurrentUser()  {
+  void getCurrentUser() {
     try {
-      final User user =  _auth.currentUser;
+      final User user = _auth.currentUser;
       if (user != null) {
         loggedInUser = user;
         print(loggedInUser.email);
@@ -33,6 +33,21 @@ class _ChatScreenState extends State<ChatScreen> {
         print('something wrong');
       }
     } catch (e) {}
+  }
+
+  // void getMessages()async {
+  //   final msg = await  _fireStore.collection('msg').get(); //Calling getDocuments() is deprecated in favor of get().
+  //   for(var m in msg.docs){ //documents has been deprecated in favor of docs.
+  //     print(m.data()); //Getting a snapshots' data via the data getter is now done via the data() method.
+  //   }
+  // }
+
+  void messageStream() async {
+    await for (var snapShot in _fireStore.collection('msg').snapshots()) {
+      for (var message in snapShot.docs) {
+        print(message.data());
+      }
+    }
   }
 
   @override
@@ -44,8 +59,9 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
               icon: Icon(Icons.close),
               onPressed: () {
-                _auth.signOut();
-                Navigator.pop(context);
+                // _auth.signOut();
+                // Navigator.pop(context);
+                messageStream();
               }),
         ],
         title: Text('⚡️Chat'),
@@ -56,6 +72,33 @@ class _ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
+
+            StreamBuilder<QuerySnapshot>(
+                stream:
+                    FirebaseFirestore.instance.collection('msg').snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.lightBlueAccent,
+                      ),
+                    );
+                  } else {
+                    final messages = snapshot.data.docs;
+                    List<Text> messageWidgets = [];
+                    for (var message in messages) {
+                      final messageText = message['text'];
+                      final messageSender = message['sender'];
+                      final messageTime = message['time'];
+
+                      final messageWidget = Text('$messageText from $messageSender at $messageTime');
+                      messageWidgets.add(messageWidget);
+                    }
+                    return Column(
+                      children: messageWidgets,
+                    );
+                  }
+                }),
             Container(
               decoration: kMessageContainerDecoration,
               child: Row(
@@ -71,9 +114,21 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   FlatButton(
                     onPressed: () {
+                      DateTime now = DateTime.now();
                       _fireStore.collection('msg').add({
                         'text': messageText,
-                          'sender' : loggedInUser.email,
+                        'sender': loggedInUser.email,
+                        'time': (now.hour.toString() +
+                            ":" +
+                            now.minute.toString() +
+                            ":" +
+                            now.second.toString() +
+                            '/' +
+                            now.day.toString() +
+                            '/' +
+                            now.month.toString() +
+                            '/' +
+                            now.year.toString()),
                       });
                     },
                     child: Text(
