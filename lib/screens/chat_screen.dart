@@ -3,6 +3,8 @@ import 'package:flash_chat/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+User loggedInUser;
+
 class ChatScreen extends StatefulWidget {
   static const String id = 'chat_screen';
 
@@ -11,11 +13,12 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-
-  final messageTextController = TextEditingController();  // clear the message input
+  final messageTextController =
+      TextEditingController(); // clear the message input
   final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  User loggedInUser;
+
+  // User loggedInUser;
 
   String messageText;
 
@@ -37,21 +40,6 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {}
   }
 
-  // void getMessages()async {
-  //   final msg = await  _fireStore.collection('msg').get(); //Calling getDocuments() is deprecated in favor of get().
-  //   for(var m in msg.docs){ //documents has been deprecated in favor of docs.
-  //     print(m.data()); //Getting a snapshots' data via the data getter is now done via the data() method.
-  //   }
-  // }
-
-  void messageStream() async {
-    await for (var snapShot in _fireStore.collection('msg').snapshots()) {
-      for (var message in snapShot.docs) {
-        print(message.data());
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,9 +49,9 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
               icon: Icon(Icons.close),
               onPressed: () {
-                // _auth.signOut();
-                // Navigator.pop(context);
-                messageStream();
+                _auth.signOut();
+                Navigator.pop(context);
+
               }),
         ],
         title: Text('⚡️Chat'),
@@ -82,7 +70,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: <Widget>[
                   Expanded(
                     child: TextField(
-                      controller: messageTextController, // clear the message input
+                      controller: messageTextController,
+                      // clear the message input
                       onChanged: (value) {
                         messageText = value;
                       },
@@ -128,8 +117,7 @@ class MessageStream extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-        stream:
-        FirebaseFirestore.instance.collection('msg').snapshots(),
+        stream: FirebaseFirestore.instance.collection('msg').snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return Center(
@@ -138,25 +126,27 @@ class MessageStream extends StatelessWidget {
               ),
             );
           } else {
-            final messages = snapshot.data.docs;
+            final messages = snapshot.data.docs.reversed;
             List<MessageBubble> messageBubbles = [];
             for (var message in messages) {
               final messageText = message['text'];
               final messageSender = message['sender'];
               //final messageTime = message[time];
+              final String currentUser = loggedInUser.email;
 
               final messageBubble = MessageBubble(
                 sender: messageSender,
                 // time: messageTime,
                 text: messageText,
+                isMe: currentUser == messageSender,
               );
 
               messageBubbles.add(messageBubble);
             }
             return Expanded(
               child: ListView(
-                padding: EdgeInsets.symmetric(
-                    vertical: 20.0, horizontal: 10.0),
+                reverse: true,
+                padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
                 children: messageBubbles,
               ),
             );
@@ -165,34 +155,50 @@ class MessageStream extends StatelessWidget {
   }
 }
 
-
 class MessageBubble extends StatelessWidget {
-  MessageBubble({this.sender, this.text});
+  MessageBubble({this.sender, this.text, this.isMe});
 
   final String sender;
-  //final String time;
   final String text;
+
+  //final String time;
+  final bool isMe;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(10.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          Text(sender,
-          style: TextStyle(
-            fontSize: 12.0,
-            color: Colors.black38,
-          ),),
+          Text(
+            sender,
+            style: TextStyle(
+              fontSize: 12.0,
+              color: Colors.black38,
+            ),
+          ),
           Material(
-              borderRadius: BorderRadius.circular(30.0),
+              borderRadius: isMe
+                  ? BorderRadius.only(
+                      topLeft: Radius.circular(30.0),
+                      bottomLeft: Radius.circular(30.0),
+                      bottomRight: Radius.circular(30.0))
+                  : BorderRadius.only(
+                      topRight: Radius.circular(30.0),
+                      bottomLeft: Radius.circular(30.0),
+                      bottomRight: Radius.circular(30.0)),
               elevation: 5.0,
-              color: Colors.lightBlueAccent,
+              color: isMe ? Colors.lightBlueAccent : Colors.white,
               child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                  child: Text('$text from',
-                    style: TextStyle(fontSize: 15.0),))),
+                  padding:
+                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                  child: Text(
+                    '$text',
+                    style: TextStyle(
+                        fontSize: 15.0,
+                        color: isMe ? Colors.white : Colors.black),
+                  ))),
         ],
       ),
     );
